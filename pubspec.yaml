@@ -1,0 +1,23 @@
+name: swipe_overlays
+description: Swipe Overlays
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.0.2"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_riverpod: ^0.13.1+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  assets:
+    - images/
+
+  uses-material-design: true
