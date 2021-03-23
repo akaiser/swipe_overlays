@@ -1,24 +1,26 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swipe_overlays/swipe_overlay.dart';
 import 'package:swipe_overlays/util/preload.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await preload(const AssetImage('images/main.jpg'));
+  await Future.wait(
+    ['main', 'left', 'up', 'right', 'down']
+        .map((e) => AssetImage('images/$e.jpg'))
+        .map(preload),
+  );
 
   runZonedGuarded<void>(
     () => runApp(
-      const ProviderScope(
-        child: MaterialApp(
-          title: 'Swipe Overlays',
-          debugShowCheckedModeBanner: false,
-          home: Scaffold(body: _MainBody()),
-        ),
+      const MaterialApp(
+        title: 'Swipe Overlays',
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(body: _Body()),
       ),
     ),
     (dynamic error, dynamic stack) {
@@ -27,8 +29,8 @@ Future<void> main() async {
   );
 }
 
-class _MainBody extends StatelessWidget {
-  const _MainBody({Key? key}) : super(key: key);
+class _Body extends StatelessWidget {
+  const _Body({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -46,36 +48,43 @@ class _MainBody extends StatelessWidget {
             width: screenSize.width,
             height: screenSize.height,
             padding: const EdgeInsets.all(handleSize),
-            child: const Center(
-              child: Text(
-                'Main Content goes here',
-                style: TextStyle(color: Colors.white),
-              ),
+            child: const Text(
+              'main',
+              style: TextStyle(color: Colors.white),
             ),
           ),
         ),
-        SwipeOverlay(
-          direction: SwipeDirection.left,
-          child: ListView(
-            children: List.generate(
-              100,
-              (index) => Text('item $index'),
-            ),
-          ),
-        ),
-        const SwipeOverlay(
-          direction: SwipeDirection.up,
-          child: Text('up'),
-        ),
-        const SwipeOverlay(
-          direction: SwipeDirection.right,
-          child: Text('right'),
-        ),
-        const SwipeOverlay(
-          direction: SwipeDirection.down,
-          child: Text('down'),
-        ),
+        const _OverlayWrapper(SwipeDirection.left),
+        const _OverlayWrapper(SwipeDirection.up),
+        const _OverlayWrapper(SwipeDirection.right),
+        const _OverlayWrapper(SwipeDirection.down),
       ],
+    );
+  }
+}
+
+class _OverlayWrapper extends StatelessWidget {
+  const _OverlayWrapper(this.direction, {Key? key}) : super(key: key);
+
+  final SwipeDirection direction;
+
+  @override
+  Widget build(BuildContext context) {
+    final directionValue = describeEnum(direction);
+    return SwipeOverlay(
+      direction: direction,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            fit: BoxFit.cover,
+            image: AssetImage('images/$directionValue.jpg'),
+          ),
+        ),
+        child: Text(
+          directionValue,
+          style: const TextStyle(color: Colors.purpleAccent),
+        ),
+      ),
     );
   }
 }

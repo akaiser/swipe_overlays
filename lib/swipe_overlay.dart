@@ -53,7 +53,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   double get offsetByDirection {
     final direction = widget.direction;
     return direction == SwipeDirection.right || direction == SwipeDirection.down
-        ? -_offset
+        ? handleSize - _offset
         : _offset - handleSize;
   }
 
@@ -104,10 +104,9 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     final content = [
       if (direction == SwipeDirection.left || direction == SwipeDirection.up)
         arrowIcon,
-      Container(
-        width: screenSize.width,
-        height: screenSize.height,
-        color: Colors.orangeAccent,
+      SizedBox(
+        width: screenSize.width - (isHorizontal ? handleSize : 0),
+        height: screenSize.height - (!isHorizontal ? handleSize : 0),
         child: widget.child,
       ),
       if (direction == SwipeDirection.right || direction == SwipeDirection.down)
