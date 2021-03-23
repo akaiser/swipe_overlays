@@ -1,3 +1,3 @@
 # Swipe overlays
 
-[Demo](https://akaiser.github.io/swipe_overlays/#/)
+<a href="https://akaiser.github.io/swipe_overlays/#/" target="_blank">Demo</a>
