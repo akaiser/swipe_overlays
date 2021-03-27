@@ -38,7 +38,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     setState(() => _isExpanded = isExpanded);
     _calculateOffset();
 
-    context.read(currentExpended).state =
+    context.read(currentExpanded).state =
         _isExpanded ? widget.direction : SwipeDirection.none;
   }
 
@@ -73,7 +73,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
 
     return Consumer(
       builder: (context, watch, child) {
-        final current = watch(currentExpended).state;
+        final current = watch(currentExpanded).state;
         return AnimatedPositioned(
           left: isHorizontal
               ? offsetByDirection +
@@ -168,7 +168,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
           }
 
           GestureDragStartCallback? onDragStart(DragStartDetails _) {
-            context.read(currentExpended).state = widget.direction;
+            context.read(currentExpanded).state = widget.direction;
           }
 
           return GestureDetector(

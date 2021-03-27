@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swipe_overlays/swipe_overlay.dart';
 import 'package:swipe_overlays/util/preload.dart';
 
-final currentExpended = StateProvider<SwipeDirection>(
+final currentExpanded = StateProvider<SwipeDirection>(
   (_) => SwipeDirection.none,
 );
 
