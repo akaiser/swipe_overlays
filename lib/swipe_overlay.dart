@@ -28,10 +28,10 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   bool _isExpanded = false;
   double _offset = 0;
 
-  final _handleIcon = Icon(
+  static const _handleIcon = Icon(
     Icons.drag_handle,
     size: handleSize,
-    color: Colors.white.withOpacity(0.4),
+    color: Colors.white,
   );
 
   void _setExpanded(bool isExpanded) {
@@ -63,7 +63,13 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
 
   @override
   void didChangeDependencies() {
+    _isExpanded = false;
     _calculateOffset(init: true);
+
+    WidgetsBinding.instance!.addPostFrameCallback(
+      (_) => context.read(currentExpanded).state = SwipeDirection.none,
+    );
+
     super.didChangeDependencies();
   }
 
@@ -116,17 +122,20 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
           final screenSize = MediaQuery.of(context).size;
 
           final handleArea = GestureDetector(
-            onTap: () {
-              Feedback.forTap(context);
-              _setExpanded(!_isExpanded);
-            },
+            onTap: Feedback.wrapForTap(
+              () => _setExpanded(!_isExpanded),
+              context,
+            ),
             child: Container(
               color: Colors.transparent,
               width: !isHorizontal ? screenSize.width : null,
               height: isHorizontal ? screenSize.height : null,
               child: direction == SwipeDirection.right ||
                       direction == SwipeDirection.left
-                  ? RotatedBox(quarterTurns: 1, child: _handleIcon)
+                  ? const RotatedBox(
+                      quarterTurns: 1,
+                      child: _handleIcon,
+                    )
                   : _handleIcon,
             ),
           );
@@ -145,9 +154,9 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
               handleArea,
           ];
 
-          GestureDragUpdateCallback? onDragUpdate(double? primaryDelta) {
+          GestureDragUpdateCallback? onDragUpdate(double primaryDelta) {
             final offset = _offset +
-                primaryDelta! *
+                primaryDelta *
                     (direction == SwipeDirection.right ||
                             direction == SwipeDirection.down
                         ? -1
@@ -167,7 +176,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
             );
           }
 
-          GestureDragStartCallback? onDragStart(DragStartDetails _) {
+          GestureDragStartCallback? onDragStart(_) {
             context.read(currentExpanded).state = widget.direction;
           }
 
@@ -175,10 +184,10 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
             onHorizontalDragStart: isHorizontal ? onDragStart : null,
             onVerticalDragStart: !isHorizontal ? onDragStart : null,
             onHorizontalDragUpdate: isHorizontal
-                ? (details) => onDragUpdate(details.primaryDelta)
+                ? (details) => onDragUpdate(details.primaryDelta!)
                 : null,
             onVerticalDragUpdate: !isHorizontal
-                ? (details) => onDragUpdate(details.primaryDelta)
+                ? (details) => onDragUpdate(details.primaryDelta!)
                 : null,
             onHorizontalDragEnd: isHorizontal ? (_) => onDragEnd() : null,
             onVerticalDragEnd: !isHorizontal ? (_) => onDragEnd() : null,
