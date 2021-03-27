@@ -3,8 +3,13 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swipe_overlays/swipe_overlay.dart';
 import 'package:swipe_overlays/util/preload.dart';
+
+final currentExpended = StateProvider<SwipeDirection>(
+  (_) => SwipeDirection.none,
+);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,10 +22,12 @@ Future<void> main() async {
 
   runZonedGuarded<void>(
     () => runApp(
-      const MaterialApp(
-        title: 'Swipe Overlays',
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(body: _Body()),
+      const ProviderScope(
+        child: MaterialApp(
+          title: 'Swipe Overlays',
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(body: _Body()),
+        ),
       ),
     ),
     (dynamic error, dynamic stack) {

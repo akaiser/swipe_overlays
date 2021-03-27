@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:swipe_overlays/util/tap_detector.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:swipe_overlays/main.dart';
 
 const handleSize = 40.0;
 const _duration = Duration(seconds: 1);
 
-enum SwipeDirection { left, up, right, down }
+enum SwipeDirection { left, up, right, down, none }
 
 class SwipeOverlay extends StatefulWidget {
   const SwipeOverlay({
@@ -24,7 +25,7 @@ class SwipeOverlay extends StatefulWidget {
 }
 
 class _SwipeOverlayState extends State<SwipeOverlay> {
-  bool _isExpanded = true;
+  bool _isExpanded = false;
   double _offset = 0;
 
   final _handleIcon = Icon(
@@ -36,11 +37,14 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   void _setExpanded(bool isExpanded) {
     setState(() => _isExpanded = isExpanded);
     _calculateOffset();
+
+    context.read(currentExpended).state =
+        _isExpanded ? widget.direction : SwipeDirection.none;
   }
 
   void _calculateOffset({bool init = false}) {
     final screenSize = MediaQuery.of(context).size;
-    _offset = _isExpanded || init
+    _offset = !_isExpanded || init
         ? widget.isHorizontal
             ? screenSize.width
             : screenSize.height -
@@ -65,69 +69,124 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    final direction = widget.direction;
     final isHorizontal = widget.isHorizontal;
-    final screenSize = MediaQuery.of(context).size;
 
-    final arrowIcon = TapDetector(
-      onTap: () => _setExpanded(!_isExpanded),
-      child: SizedBox(
-        width: !isHorizontal ? screenSize.width : null,
-        height: isHorizontal ? screenSize.height : null,
-        child: direction == SwipeDirection.right ||
-                direction == SwipeDirection.left
-            ? RotatedBox(quarterTurns: 1, child: _handleIcon)
-            : _handleIcon,
-      ),
-    );
+    return Consumer(
+      builder: (context, watch, child) {
+        final current = watch(currentExpended).state;
+        return AnimatedPositioned(
+          left: isHorizontal
+              ? offsetByDirection +
+                  (current == SwipeDirection.right &&
+                          widget.direction == SwipeDirection.left
+                      ? handleSize
+                      : (current == SwipeDirection.left &&
+                              widget.direction == SwipeDirection.right
+                          ? -handleSize
+                          : current == SwipeDirection.up ||
+                                  current == SwipeDirection.down
+                              ? widget.direction == SwipeDirection.left
+                                  ? handleSize
+                                  : -handleSize
+                              : 0))
+              : null,
+          top: !isHorizontal
+              ? offsetByDirection +
+                  (current == SwipeDirection.down &&
+                          widget.direction == SwipeDirection.up
+                      ? handleSize
+                      : (current == SwipeDirection.up &&
+                              widget.direction == SwipeDirection.down
+                          ? -handleSize
+                          : current == SwipeDirection.right ||
+                                  current == SwipeDirection.left
+                              ? widget.direction == SwipeDirection.up
+                                  ? handleSize
+                                  : -handleSize
+                              : 0))
+              : null,
+          curve: Curves.ease,
+          duration: _duration,
+          child: child!,
+        );
+      },
+      child: Builder(
+        builder: (context) {
+          final direction = widget.direction;
+          final screenSize = MediaQuery.of(context).size;
 
-    GestureDragUpdateCallback? onDragUpdate(double? primaryDelta) {
-      final offset = _offset +
-          primaryDelta! *
-              (direction == SwipeDirection.right ||
-                      direction == SwipeDirection.down
-                  ? -1
-                  : 1) *
-              2;
-      if (offset >= 0 &&
-          offset <= (isHorizontal ? screenSize.width : screenSize.height)) {
-        setState(() => _offset = offset);
-      }
-    }
+          final handleArea = GestureDetector(
+            onTap: () {
+              Feedback.forTap(context);
+              _setExpanded(!_isExpanded);
+            },
+            child: Container(
+              color: Colors.transparent,
+              width: !isHorizontal ? screenSize.width : null,
+              height: isHorizontal ? screenSize.height : null,
+              child: direction == SwipeDirection.right ||
+                      direction == SwipeDirection.left
+                  ? RotatedBox(quarterTurns: 1, child: _handleIcon)
+                  : _handleIcon,
+            ),
+          );
 
-    GestureDragEndCallback? onDragEnd() {
-      _setExpanded(
-        _offset >= (isHorizontal ? screenSize.width : screenSize.height) / 2,
-      );
-    }
+          final content = [
+            if (direction == SwipeDirection.left ||
+                direction == SwipeDirection.up)
+              handleArea,
+            SizedBox(
+              width: screenSize.width - (isHorizontal ? handleSize : 0),
+              height: screenSize.height - (!isHorizontal ? handleSize : 0),
+              child: widget.child,
+            ),
+            if (direction == SwipeDirection.right ||
+                direction == SwipeDirection.down)
+              handleArea,
+          ];
 
-    final content = [
-      if (direction == SwipeDirection.left || direction == SwipeDirection.up)
-        arrowIcon,
-      SizedBox(
-        width: screenSize.width - (isHorizontal ? handleSize : 0),
-        height: screenSize.height - (!isHorizontal ? handleSize : 0),
-        child: widget.child,
-      ),
-      if (direction == SwipeDirection.right || direction == SwipeDirection.down)
-        arrowIcon,
-    ];
-    return AnimatedPositioned(
-      left: isHorizontal ? offsetByDirection : null,
-      top: !isHorizontal ? offsetByDirection : null,
-      curve: Curves.ease,
-      duration: _duration,
-      child: GestureDetector(
-        onHorizontalDragUpdate: isHorizontal
-            ? (details) => onDragUpdate(details.primaryDelta)
-            : null,
-        onVerticalDragUpdate: !isHorizontal
-            ? (details) => onDragUpdate(details.primaryDelta)
-            : null,
-        onHorizontalDragEnd: isHorizontal ? (_) => onDragEnd() : null,
-        onVerticalDragEnd: !isHorizontal ? (_) => onDragEnd() : null,
-        child:
-            isHorizontal ? Row(children: content) : Column(children: content),
+          GestureDragUpdateCallback? onDragUpdate(double? primaryDelta) {
+            final offset = _offset +
+                primaryDelta! *
+                    (direction == SwipeDirection.right ||
+                            direction == SwipeDirection.down
+                        ? -1
+                        : 1) *
+                    2;
+            if (offset >= 0 &&
+                offset <=
+                    (isHorizontal ? screenSize.width : screenSize.height)) {
+              setState(() => _offset = offset);
+            }
+          }
+
+          GestureDragEndCallback? onDragEnd() {
+            _setExpanded(
+              _offset <
+                  (isHorizontal ? screenSize.width : screenSize.height) / 2,
+            );
+          }
+
+          GestureDragStartCallback? onDragStart(DragStartDetails _) {
+            context.read(currentExpended).state = widget.direction;
+          }
+
+          return GestureDetector(
+            onHorizontalDragStart: isHorizontal ? onDragStart : null,
+            onVerticalDragStart: !isHorizontal ? onDragStart : null,
+            onHorizontalDragUpdate: isHorizontal
+                ? (details) => onDragUpdate(details.primaryDelta)
+                : null,
+            onVerticalDragUpdate: !isHorizontal
+                ? (details) => onDragUpdate(details.primaryDelta)
+                : null,
+            onHorizontalDragEnd: isHorizontal ? (_) => onDragEnd() : null,
+            onVerticalDragEnd: !isHorizontal ? (_) => onDragEnd() : null,
+            child: isHorizontal
+                ? Row(children: content)
+                : Column(children: content),
+          );
+        },
       ),
     );
   }
