@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swipe_overlays/swipe_overlay.dart';
 import 'package:swipe_overlays/util/preload.dart';
@@ -26,7 +27,10 @@ Future<void> main() async {
         child: MaterialApp(
           title: 'Swipe Overlays',
           debugShowCheckedModeBanner: false,
-          home: Scaffold(body: _Body()),
+          home: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(statusBarColor: Colors.red),
+            child: Scaffold(body: _Body()),
+          ),
         ),
       ),
     ),
@@ -44,22 +48,17 @@ class _Body extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     return Stack(
       children: [
-        DecoratedBox(
+        Container(
+          width: screenSize.width,
+          height: screenSize.height,
           decoration: const BoxDecoration(
             image: DecorationImage(
               fit: BoxFit.cover,
               image: AssetImage('images/main.jpg'),
             ),
           ),
-          child: Container(
-            width: screenSize.width,
-            height: screenSize.height,
-            padding: const EdgeInsets.all(handleSize),
-            child: const Text(
-              'main',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
+          padding: const EdgeInsets.all(handleSize),
+          child: const _TestContent(Colors.white),
         ),
         const _OverlayWrapper(SwipeDirection.left),
         const _OverlayWrapper(SwipeDirection.up),
@@ -87,11 +86,41 @@ class _OverlayWrapper extends StatelessWidget {
             image: AssetImage('images/$directionValue.jpg'),
           ),
         ),
-        child: Text(
-          directionValue,
-          style: const TextStyle(color: Colors.purpleAccent),
-        ),
+        child: const _TestContent(Colors.black),
       ),
+    );
+  }
+}
+
+class _TestContent extends StatelessWidget {
+  const _TestContent(
+    this.textColor, {
+    Key? key,
+  }) : super(key: key);
+
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = TextStyle(color: textColor, fontWeight: FontWeight.bold);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('top left', style: textStyle),
+            Text('top right', style: textStyle),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('bottom left', style: textStyle),
+            Text('bottom right', style: textStyle),
+          ],
+        ),
+      ],
     );
   }
 }

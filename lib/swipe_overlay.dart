@@ -47,11 +47,8 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     _offset = !_isExpanded || init
         ? widget.isHorizontal
             ? screenSize.width
-            : screenSize.height -
-                (widget.direction == SwipeDirection.up
-                    ? 0 // 24 on mobile if we would add SafeArea
-                    : 0)
-        : 0 + handleSize;
+            : screenSize.height
+        : handleSize;
   }
 
   double get offsetByDirection {
