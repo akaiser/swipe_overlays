@@ -3,34 +3,29 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swipe_overlays/swipe_overlay.dart';
-import 'package:swipe_overlays/util/preload.dart';
-
-final currentExpanded = StateProvider<SwipeDirection>(
-  (_) => SwipeDirection.none,
-);
+import 'package:swipe_overlays/util/image.dart' as image_util;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Future.wait(
-    ['main', 'left', 'up', 'right', 'down']
-        .map((e) => AssetImage('images/$e.jpg'))
-        .map(preload),
+    Location.values
+        .map(describeEnum)
+        .map((value) => AssetImage('images/$value.jpg'))
+        .map(image_util.precacheImage),
   );
 
   runZonedGuarded<void>(
     () => runApp(
-      const ProviderScope(
+      ProviderScope(
         child: MaterialApp(
           title: 'Swipe Overlays',
+          theme: ThemeData(brightness: Brightness.dark),
           debugShowCheckedModeBanner: false,
-          home: AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle(statusBarColor: Colors.red),
-            child: Scaffold(body: _Body()),
-          ),
+          home: const Scaffold(body: _Body()),
         ),
       ),
     ),
@@ -45,79 +40,94 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    return Stack(
-      children: [
-        Container(
-          width: screenSize.width,
-          height: screenSize.height,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              fit: BoxFit.cover,
-              image: AssetImage('images/main.jpg'),
-            ),
+    final queryData = MediaQuery.of(context);
+    final padding = queryData.padding;
+    return SafeArea(
+      child: Stack(
+        children: [
+          SizedBox(
+            width: queryData.size.width,
+            height: queryData.size.height,
+            child: const _Background(Location.none),
           ),
-          padding: const EdgeInsets.all(handleSize),
-          child: const _TestContent(Colors.white),
-        ),
-        const _OverlayWrapper(SwipeDirection.left),
-        const _OverlayWrapper(SwipeDirection.up),
-        const _OverlayWrapper(SwipeDirection.right),
-        const _OverlayWrapper(SwipeDirection.down),
-      ],
+          _OverlayWrapper(Location.left, padding),
+          _OverlayWrapper(Location.right, padding),
+          _OverlayWrapper(Location.bottom, padding),
+          _OverlayWrapper(Location.top, padding),
+        ],
+      ),
     );
   }
 }
 
 class _OverlayWrapper extends StatelessWidget {
-  const _OverlayWrapper(this.direction, {Key? key}) : super(key: key);
+  const _OverlayWrapper(
+    this.location,
+    this.padding, {
+    Key? key,
+  }) : super(key: key);
 
-  final SwipeDirection direction;
+  final Location location;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
-    final directionValue = describeEnum(direction);
     return SwipeOverlay(
-      direction: direction,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: AssetImage('images/$directionValue.jpg'),
-          ),
+      location,
+      padding,
+      child: _Background(location),
+    );
+  }
+}
+
+class _Background extends StatelessWidget {
+  const _Background(this.location, {Key? key}) : super(key: key);
+
+  final Location location;
+
+  @override
+  Widget build(BuildContext context) {
+    const content = _TestContent();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: AssetImage('images/${describeEnum(location)}.jpg'),
         ),
-        child: const _TestContent(Colors.black),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.all(handleSize),
+        child: content,
       ),
     );
   }
 }
 
 class _TestContent extends StatelessWidget {
-  const _TestContent(
-    this.textColor, {
-    Key? key,
-  }) : super(key: key);
-
-  final Color textColor;
+  const _TestContent({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = TextStyle(color: textColor, fontWeight: FontWeight.bold);
+    const textStyle = TextStyle(
+      color: Colors.white,
+      backgroundColor: Colors.black,
+      fontWeight: FontWeight.bold,
+    );
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('top left', style: textStyle),
-            Text('top right', style: textStyle),
+          children: const [
+            Text(' top left ', style: textStyle),
+            Text(' top right ', style: textStyle),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('bottom left', style: textStyle),
-            Text('bottom right', style: textStyle),
+          children: const [
+            Text(' bottom left ', style: textStyle),
+            Text(' bottom right ', style: textStyle),
           ],
         ),
       ],

@@ -6,29 +6,17 @@ analyzer:
     missing_required_param: error
     missing_return: error
     todo: ignore
-    undefined_prefixed_name: ignore
+    deprecated_member_use_from_same_package: ignore
+    sdk_version_async_exported_from_core: ignore
   language:
     strict-inference: true
     strict-raw-types: true
-  exclude:
-    - lib/**/*.g.dart
-    - dependencies/flutter_stetho/**
-    - dependencies/fast_qr_reader_view/**
-    - dependencies/flutter_downloader/**
-    - dependencies/webview_flutter/**
-    - dependencies/flutter_markdown/**
-    - dependencies/flutter_stetho/**
-    - dependencies/zefyr/**
-    - dependencies/notus/**
-    - dependencies/flutter_reorderable_list/**
-    - dependencies/groupon_metrics_module/**
-    - lib/generated_plugin_registrant.dart
 
 linter:
   rules:
     - always_declare_return_types
     - always_put_control_body_on_new_line
-    # - always_put_required_named_parameters_first # not crucial and we do it all around
+    - always_put_required_named_parameters_first
     - always_require_non_null_named_parameters
     # - always_specify_types # we use type inference
     - always_use_package_imports
@@ -40,7 +28,7 @@ linter:
     - avoid_catching_errors
     - avoid_classes_with_only_static_members
     - avoid_double_and_int_checks
-    # - avoid_dynamic_calls # we use dynamics in dispatch
+    - avoid_dynamic_calls
     - avoid_empty_else
     - avoid_equals_and_hash_code_on_mutable_classes
     - avoid_escaping_inner_quotes
@@ -57,7 +45,7 @@ linter:
     - avoid_relative_lib_imports
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
-    # - avoid_returning_null # we do this commonly
+    - avoid_returning_null
     - avoid_returning_null_for_future
     - avoid_returning_null_for_void
     - avoid_returning_this
@@ -100,7 +88,7 @@ linter:
     - leading_newlines_in_multiline_strings
     - library_names
     - library_prefixes
-    # - lines_longer_than_80_chars # we use it when temporarily adding strings before translations
+    - lines_longer_than_80_chars
     - list_remove_unrelated_type
     - literal_only_boolean_expressions
     - missing_whitespace_between_adjacent_strings
@@ -165,7 +153,7 @@ linter:
     - slash_for_doc_comments
     - sort_child_properties_last
     - sort_constructors_first
-    # - sort_pub_dependencies # Too strict
+    - sort_pub_dependencies
     - sort_unnamed_constructors_first
     - test_types_in_equals
     - throw_in_finally
@@ -192,7 +180,7 @@ linter:
     - unnecessary_string_interpolations
     - unnecessary_this
     - unrelated_type_equality_checks
-    # - unsafe_html We do this
+    - unsafe_html
     - use_full_hex_values_for_flutter_colors
     - use_function_type_syntax_for_parameters
     - use_is_even_rather_than_modulo

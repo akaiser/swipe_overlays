@@ -1,24 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:swipe_overlays/main.dart';
+
+final currentExpanded = StateProvider<Location>((_) => Location.none);
 
 const handleSize = 40.0;
+
 const _duration = Duration(seconds: 1);
 
-enum SwipeDirection { left, up, right, down, none }
+enum Location { left, bottom, right, top, none }
 
 class SwipeOverlay extends StatefulWidget {
-  const SwipeOverlay({
-    Key? key,
-    required this.direction,
+  const SwipeOverlay(
+    this.location,
+    this.padding, {
     required this.child,
+    Key? key,
   }) : super(key: key);
 
-  final SwipeDirection direction;
+  final Location location;
+  final EdgeInsets padding;
   final Widget child;
 
+  double get verticalSafeArea => padding.top + padding.bottom;
+
+  double get horizontalSafeArea => padding.left + padding.right;
+
   bool get isHorizontal =>
-      direction == SwipeDirection.left || direction == SwipeDirection.right;
+      location == Location.left || location == Location.right;
 
   @override
   _SwipeOverlayState createState() => _SwipeOverlayState();
@@ -31,15 +39,14 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   static const _handleIcon = Icon(
     Icons.drag_handle,
     size: handleSize,
-    color: Colors.white,
+    color: Colors.black,
   );
 
   void _setExpanded(bool isExpanded) {
     setState(() => _isExpanded = isExpanded);
     _calculateOffset();
-
     context.read(currentExpanded).state =
-        _isExpanded ? widget.direction : SwipeDirection.none;
+        _isExpanded ? widget.location : Location.none;
   }
 
   void _calculateOffset({bool init = false}) {
@@ -52,10 +59,27 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   }
 
   double get offsetByDirection {
-    final direction = widget.direction;
-    return direction == SwipeDirection.right || direction == SwipeDirection.down
+    final location = widget.location;
+    final verticalSafeArea = widget.verticalSafeArea;
+    final horizontalSafeArea = widget.horizontalSafeArea;
+
+    final correction = _isExpanded
+        ? 0
+        : location == Location.top
+            ? verticalSafeArea
+            : location == Location.bottom
+                ? -verticalSafeArea
+                : location == Location.left
+                    ? horizontalSafeArea
+                    : location == Location.right
+                        ? -horizontalSafeArea
+                        : 0;
+
+    final offset = location == Location.left || location == Location.top
         ? handleSize - _offset
         : _offset - handleSize;
+
+    return offset + correction;
   }
 
   @override
@@ -64,15 +88,44 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     _calculateOffset(init: true);
 
     WidgetsBinding.instance!.addPostFrameCallback(
-      (_) => context.read(currentExpanded).state = SwipeDirection.none,
+      (_) => context.read(currentExpanded).state = Location.none,
     );
-
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
+    final queryData = MediaQuery.of(context);
+    final screenSize = queryData.size;
+    final screenWidth = screenSize.width - widget.horizontalSafeArea;
+    final screenHeight = screenSize.height - widget.verticalSafeArea;
+
     final isHorizontal = widget.isHorizontal;
+    final location = widget.location;
+
+    final handleArea = InkWell(
+      onTap: Feedback.wrapForTap(
+        () => _setExpanded(!_isExpanded),
+        context,
+      ),
+      child: SizedBox(
+        width: !isHorizontal ? screenWidth : null,
+        height: isHorizontal ? screenHeight : null,
+        child: isHorizontal
+            ? const RotatedBox(quarterTurns: 1, child: _handleIcon)
+            : _handleIcon,
+      ),
+    );
+
+    final content = [
+      if (location == Location.right || location == Location.bottom) handleArea,
+      SizedBox(
+        width: screenWidth - (isHorizontal ? handleSize : 0),
+        height: screenHeight - (!isHorizontal ? handleSize : 0),
+        child: widget.child,
+      ),
+      if (location == Location.left || location == Location.top) handleArea,
+    ];
 
     return Consumer(
       builder: (context, watch, child) {
@@ -80,114 +133,65 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
         return AnimatedPositioned(
           left: isHorizontal
               ? offsetByDirection +
-                  (current == SwipeDirection.right &&
-                          widget.direction == SwipeDirection.left
+                  (current == Location.left && location == Location.right
                       ? handleSize
-                      : (current == SwipeDirection.left &&
-                              widget.direction == SwipeDirection.right
+                      : (current == Location.right && location == Location.left
                           ? -handleSize
-                          : current == SwipeDirection.up ||
-                                  current == SwipeDirection.down
-                              ? widget.direction == SwipeDirection.left
+                          : current == Location.bottom ||
+                                  current == Location.top
+                              ? location == Location.right
                                   ? handleSize
                                   : -handleSize
                               : 0))
               : null,
           top: !isHorizontal
               ? offsetByDirection +
-                  (current == SwipeDirection.down &&
-                          widget.direction == SwipeDirection.up
+                  (current == Location.top && location == Location.bottom
                       ? handleSize
-                      : (current == SwipeDirection.up &&
-                              widget.direction == SwipeDirection.down
+                      : (current == Location.bottom && location == Location.top
                           ? -handleSize
-                          : current == SwipeDirection.right ||
-                                  current == SwipeDirection.left
-                              ? widget.direction == SwipeDirection.up
+                          : current == Location.left ||
+                                  current == Location.right
+                              ? location == Location.bottom
                                   ? handleSize
                                   : -handleSize
                               : 0))
               : null,
-          curve: Curves.ease,
           duration: _duration,
+          curve: Curves.ease,
           child: child!,
         );
       },
       child: Builder(
         builder: (context) {
-          final direction = widget.direction;
-          final screenSize = MediaQuery.of(context).size;
-
-          final handleArea = GestureDetector(
-            onTap: Feedback.wrapForTap(
-              () => _setExpanded(!_isExpanded),
-              context,
-            ),
-            child: Container(
-              color: Colors.transparent,
-              width: !isHorizontal ? screenSize.width : null,
-              height: isHorizontal ? screenSize.height : null,
-              child: direction == SwipeDirection.right ||
-                      direction == SwipeDirection.left
-                  ? const RotatedBox(
-                      quarterTurns: 1,
-                      child: _handleIcon,
-                    )
-                  : _handleIcon,
-            ),
-          );
-
-          final content = [
-            if (direction == SwipeDirection.left ||
-                direction == SwipeDirection.up)
-              handleArea,
-            SizedBox(
-              width: screenSize.width - (isHorizontal ? handleSize : 0),
-              height: screenSize.height - (!isHorizontal ? handleSize : 0),
-              child: widget.child,
-            ),
-            if (direction == SwipeDirection.right ||
-                direction == SwipeDirection.down)
-              handleArea,
-          ];
-
-          GestureDragUpdateCallback? onDragUpdate(double primaryDelta) {
+          GestureDragUpdateCallback? onDragUpdate(DragUpdateDetails details) {
             final offset = _offset +
-                primaryDelta *
-                    (direction == SwipeDirection.right ||
-                            direction == SwipeDirection.down
+                details.primaryDelta! *
+                    (location == Location.left || location == Location.top
                         ? -1
                         : 1) *
                     2;
-            if (offset >= 0 &&
-                offset <=
-                    (isHorizontal ? screenSize.width : screenSize.height)) {
-              setState(() => _offset = offset);
-            }
+
+            setState(() => _offset = offset);
           }
 
-          GestureDragEndCallback? onDragEnd() {
+          GestureDragEndCallback? onDragEnd(_) {
             _setExpanded(
-              _offset <
-                  (isHorizontal ? screenSize.width : screenSize.height) / 2,
+              _offset < (isHorizontal ? screenWidth : screenHeight) / 2,
             );
           }
 
           GestureDragStartCallback? onDragStart(_) {
-            context.read(currentExpanded).state = widget.direction;
+            context.read(currentExpanded).state = widget.location;
           }
 
           return GestureDetector(
+            onHorizontalDragUpdate: isHorizontal ? onDragUpdate : null,
             onHorizontalDragStart: isHorizontal ? onDragStart : null,
+            onHorizontalDragEnd: isHorizontal ? onDragEnd : null,
+            onVerticalDragUpdate: !isHorizontal ? onDragUpdate : null,
             onVerticalDragStart: !isHorizontal ? onDragStart : null,
-            onHorizontalDragUpdate: isHorizontal
-                ? (details) => onDragUpdate(details.primaryDelta!)
-                : null,
-            onVerticalDragUpdate: !isHorizontal
-                ? (details) => onDragUpdate(details.primaryDelta!)
-                : null,
-            onHorizontalDragEnd: isHorizontal ? (_) => onDragEnd() : null,
-            onVerticalDragEnd: !isHorizontal ? (_) => onDragEnd() : null,
+            onVerticalDragEnd: !isHorizontal ? onDragEnd : null,
             child: isHorizontal
                 ? Row(children: content)
                 : Column(children: content),

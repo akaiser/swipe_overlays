@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
-Future<void> preload(ImageProvider provider) {
+Future<void> precacheImage(ImageProvider provider) {
   final config = ImageConfiguration(
     bundle: rootBundle,
     devicePixelRatio: 1,
