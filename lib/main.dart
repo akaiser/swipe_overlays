@@ -108,29 +108,44 @@ class _TestContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const textStyle = TextStyle(
-      color: Colors.white,
-      backgroundColor: Colors.black,
-      fontWeight: FontWeight.bold,
-    );
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: const [
-            Text(' top left ', style: textStyle),
-            Text(' top right ', style: textStyle),
+            SomeText('top left'),
+            SomeText('top right'),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: const [
-            Text(' bottom left ', style: textStyle),
-            Text(' bottom right ', style: textStyle),
+            SomeText('bottom left'),
+            SomeText('bottom right'),
           ],
         ),
       ],
+    );
+  }
+}
+
+class SomeText extends StatelessWidget {
+  const SomeText(this.text, {Key? key}) : super(key: key);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.black,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Text(
+          text,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
     );
   }
 }
