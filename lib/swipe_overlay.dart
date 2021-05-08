@@ -60,19 +60,17 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
 
   double get offsetByDirection {
     final location = widget.location;
-    final verticalSafeArea = widget.verticalSafeArea;
-    final horizontalSafeArea = widget.horizontalSafeArea;
 
     final correction = _isExpanded
         ? 0
         : location == Location.top
-            ? verticalSafeArea
+            ? widget.verticalSafeArea
             : location == Location.bottom
-                ? -verticalSafeArea
+                ? -widget.verticalSafeArea
                 : location == Location.left
-                    ? horizontalSafeArea
+                    ? widget.horizontalSafeArea
                     : location == Location.right
-                        ? -horizontalSafeArea
+                        ? -widget.horizontalSafeArea
                         : 0;
 
     final offset = location == Location.left || location == Location.top
@@ -95,8 +93,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    final queryData = MediaQuery.of(context);
-    final screenSize = queryData.size;
+    final screenSize = MediaQuery.of(context).size;
     final screenWidth = screenSize.width - widget.horizontalSafeArea;
     final screenHeight = screenSize.height - widget.verticalSafeArea;
 
@@ -108,12 +105,15 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
         () => _setExpanded(!_isExpanded),
         context,
       ),
-      child: SizedBox(
-        width: !isHorizontal ? screenWidth : null,
-        height: isHorizontal ? screenHeight : null,
-        child: isHorizontal
-            ? const RotatedBox(quarterTurns: 1, child: _handleIcon)
-            : _handleIcon,
+      child: ColoredBox(
+        color: Colors.black.withOpacity(0.3),
+        child: SizedBox(
+          width: !isHorizontal ? screenWidth : null,
+          height: isHorizontal ? screenHeight : null,
+          child: isHorizontal
+              ? const RotatedBox(quarterTurns: 1, child: _handleIcon)
+              : _handleIcon,
+        ),
       ),
     );
 
