@@ -101,10 +101,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     final location = widget.location;
 
     final handleArea = InkWell(
-      onTap: Feedback.wrapForTap(
-        () => _setExpanded(!_isExpanded),
-        context,
-      ),
+      onTap: () => _setExpanded(!_isExpanded),
       child: ColoredBox(
         color: Colors.black.withOpacity(0.2),
         child: SizedBox(
