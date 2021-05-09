@@ -48,7 +48,7 @@ class _Body extends StatelessWidget {
           SizedBox(
             width: queryData.size.width,
             height: queryData.size.height,
-            child: const _Background(Location.none),
+            child: const _Page(Location.none),
           ),
           _OverlayWrapper(Location.left, padding),
           _OverlayWrapper(Location.right, padding),
@@ -75,19 +75,18 @@ class _OverlayWrapper extends StatelessWidget {
     return SwipeOverlay(
       location,
       padding,
-      child: _Background(location),
+      child: _Page(location),
     );
   }
 }
 
-class _Background extends StatelessWidget {
-  const _Background(this.location, {Key? key}) : super(key: key);
+class _Page extends StatelessWidget {
+  const _Page(this.location, {Key? key}) : super(key: key);
 
   final Location location;
 
   @override
   Widget build(BuildContext context) {
-    const content = _TestContent();
     return DecoratedBox(
       decoration: BoxDecoration(
         image: DecorationImage(
@@ -97,14 +96,14 @@ class _Background extends StatelessWidget {
       ),
       child: const Padding(
         padding: EdgeInsets.all(handleSize),
-        child: content,
+        child: _Content(),
       ),
     );
   }
 }
 
-class _TestContent extends StatelessWidget {
-  const _TestContent({Key? key}) : super(key: key);
+class _Content extends StatelessWidget {
+  const _Content({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -114,15 +113,15 @@ class _TestContent extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: const [
-            SomeText('top left'),
-            SomeText('top right'),
+            _Text('top left'),
+            _Text('top right'),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: const [
-            SomeText('bottom left'),
-            SomeText('bottom right'),
+            _Text('bottom left'),
+            _Text('bottom right'),
           ],
         ),
       ],
@@ -130,8 +129,8 @@ class _TestContent extends StatelessWidget {
   }
 }
 
-class SomeText extends StatelessWidget {
-  const SomeText(this.text, {Key? key}) : super(key: key);
+class _Text extends StatelessWidget {
+  const _Text(this.text, {Key? key}) : super(key: key);
 
   final String text;
 

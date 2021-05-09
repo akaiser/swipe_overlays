@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final currentExpanded = StateProvider<Location>((_) => Location.none);
 
-const handleSize = 40.0;
+const handleSize = 36.0;
 
 const _duration = Duration(seconds: 1);
 
@@ -106,7 +106,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
         context,
       ),
       child: ColoredBox(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withOpacity(0.2),
         child: SizedBox(
           width: !isHorizontal ? screenWidth : null,
           height: isHorizontal ? screenHeight : null,
