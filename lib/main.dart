@@ -3,20 +3,14 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swipe_overlays/swipe_overlay.dart';
-import 'package:swipe_overlays/util/image.dart' as image_util;
+import 'package:swipe_overlays/util/image.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Future.wait(
-    Location.values
-        .map(describeEnum)
-        .map((value) => AssetImage('images/$value.jpg'))
-        .map(image_util.precacheImage),
-  );
+  await precache(const AssetImage('images/none.jpg'));
 
   runZonedGuarded<void>(
     () => runApp(
