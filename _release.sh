@@ -16,4 +16,7 @@ flutter build web --web-renderer html
 cp -r build/web/* _demo/html
 sed -i "" 's|\="/"|\="/swipe_overlays/html/"|' _demo/html/index.html
 
-# git subtree push --prefix _demo origin gh-pages
+git add .
+git commit -m "update demo"
+git push origin main
+git subtree push --prefix _demo origin gh-pages
