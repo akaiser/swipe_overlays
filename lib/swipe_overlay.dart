@@ -5,7 +5,7 @@ final currentExpanded = StateProvider<Location>((_) => Location.none);
 
 const handleSize = 36.0;
 
-const _duration = Duration(seconds: 1);
+const _duration = Duration(milliseconds: 500);
 
 enum Location { left, bottom, right, top, none }
 
@@ -155,7 +155,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
                               : 0))
               : null,
           duration: _duration,
-          curve: Curves.ease,
+          curve: Curves.easeOut,
           child: child!,
         );
       },
