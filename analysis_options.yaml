@@ -1,1 +1,8 @@
 include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    - lines_longer_than_80_chars
+    - prefer_final_fields
+    - prefer_final_in_for_each
+    - prefer_final_locals
