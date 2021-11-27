@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 
-final currentExpanded = StateProvider<Location>((_) => Location.none);
+import 'package:flutter/material.dart';
 
 const handleSize = 36.0;
 
@@ -14,11 +13,13 @@ class SwipeOverlay extends StatefulWidget {
     this.location,
     this.padding, {
     required this.child,
+    this.currentExpandedNotifier,
     Key? key,
   }) : super(key: key);
 
   final Location location;
   final EdgeInsets padding;
+  final StreamController<Location>? currentExpandedNotifier;
   final Widget child;
 
   double get verticalSafeArea => padding.top + padding.bottom;
@@ -33,8 +34,12 @@ class SwipeOverlay extends StatefulWidget {
 }
 
 class _SwipeOverlayState extends State<SwipeOverlay> {
+  Location _currentExpanded = Location.none;
   bool _isExpanded = false;
   double _offset = 0;
+
+  late StreamSink<Location>? currentExpandedSink;
+  late StreamSubscription? currentExpandedSub;
 
   static const _handleIcon = Icon(
     Icons.drag_handle,
@@ -42,11 +47,34 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     color: Colors.black,
   );
 
+  @override
+  void initState() {
+    super.initState();
+    currentExpandedSink = widget.currentExpandedNotifier?.sink;
+    currentExpandedSub = widget.currentExpandedNotifier?.stream.listen(
+      (event) => setState(() => _currentExpanded = event),
+    );
+  }
+
+  @override
+  void dispose() {
+    currentExpandedSink?.close();
+    currentExpandedSub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    _isExpanded = false;
+    _calculateOffset(init: true);
+    currentExpandedSink?.add(Location.none);
+    super.didChangeDependencies();
+  }
+
   void _setExpanded(bool isExpanded) {
     setState(() => _isExpanded = isExpanded);
+    currentExpandedSink?.add(_isExpanded ? widget.location : Location.none);
     _calculateOffset();
-    context.read(currentExpanded).state =
-        _isExpanded ? widget.location : Location.none;
   }
 
   void _calculateOffset({bool init = false}) {
@@ -78,17 +106,6 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
         : _offset - handleSize;
 
     return offset + correction;
-  }
-
-  @override
-  void didChangeDependencies() {
-    _isExpanded = false;
-    _calculateOffset(init: true);
-
-    WidgetsBinding.instance!.addPostFrameCallback(
-      (_) => context.read(currentExpanded).state = Location.none,
-    );
-    super.didChangeDependencies();
   }
 
   @override
@@ -124,41 +141,34 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
       if (location == Location.left || location == Location.top) handleArea,
     ];
 
-    return Consumer(
-      builder: (context, watch, child) {
-        final current = watch(currentExpanded).state;
-        return AnimatedPositioned(
-          left: isHorizontal
-              ? offsetByDirection +
-                  (current == Location.left && location == Location.right
-                      ? handleSize
-                      : (current == Location.right && location == Location.left
-                          ? -handleSize
-                          : current == Location.bottom ||
-                                  current == Location.top
-                              ? location == Location.right
-                                  ? handleSize
-                                  : -handleSize
-                              : 0))
-              : null,
-          top: !isHorizontal
-              ? offsetByDirection +
-                  (current == Location.top && location == Location.bottom
-                      ? handleSize
-                      : (current == Location.bottom && location == Location.top
-                          ? -handleSize
-                          : current == Location.left ||
-                                  current == Location.right
-                              ? location == Location.bottom
-                                  ? handleSize
-                                  : -handleSize
-                              : 0))
-              : null,
-          duration: _animationMillis,
-          curve: Curves.easeOut,
-          child: child!,
-        );
-      },
+    final current = _currentExpanded;
+    return AnimatedPositioned(
+      left: isHorizontal
+          ? offsetByDirection +
+              (current == Location.left && location == Location.right
+                  ? handleSize
+                  : (current == Location.right && location == Location.left
+                      ? -handleSize
+                      : current == Location.bottom || current == Location.top
+                          ? location == Location.right
+                              ? handleSize
+                              : -handleSize
+                          : 0))
+          : null,
+      top: !isHorizontal
+          ? offsetByDirection +
+              (current == Location.top && location == Location.bottom
+                  ? handleSize
+                  : (current == Location.bottom && location == Location.top
+                      ? -handleSize
+                      : current == Location.left || current == Location.right
+                          ? location == Location.bottom
+                              ? handleSize
+                              : -handleSize
+                          : 0))
+          : null,
+      duration: _animationMillis,
+      curve: Curves.easeOut,
       child: Builder(
         builder: (context) {
           GestureDragUpdateCallback? onDragUpdate(DragUpdateDetails details) {
@@ -179,7 +189,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
           }
 
           GestureDragStartCallback? onDragStart(_) {
-            context.read(currentExpanded).state = widget.location;
+            currentExpandedSink?.add(widget.location);
           }
 
           return GestureDetector(

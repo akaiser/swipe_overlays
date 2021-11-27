@@ -1,5 +1,6 @@
 name: swipe_overlays
 description: Swipe Overlays
+publish_to: none
 version: 1.0.0+1
 
 environment:
@@ -9,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^0.14.0+3
 
 dev_dependencies:
   akaiser_flutter_lints:

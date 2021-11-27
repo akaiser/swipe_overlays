@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swipe_overlays/swipe_overlay.dart';
 import 'package:swipe_overlays/util/image.dart';
 
@@ -13,43 +12,66 @@ Future<void> main() async {
   await precache(const AssetImage('images/none.jpg'));
 
   runZonedGuarded<void>(
-    () => runApp(
-      ProviderScope(
-        child: MaterialApp(
-          title: 'Swipe Overlays',
-          theme: ThemeData(brightness: Brightness.dark),
-          debugShowCheckedModeBanner: false,
-          home: const Scaffold(body: _Body()),
-        ),
-      ),
+    () => runApp(const _App()),
+    (error, stack) => log(
+      'Some explosion here...',
+      error: error,
+      stackTrace: stack,
     ),
-    (dynamic error, dynamic stack) {
-      log('Some explosion here...', error: error, stackTrace: stack);
-    },
   );
 }
 
-class _Body extends StatelessWidget {
+class _App extends StatelessWidget {
+  const _App({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Swipe Overlays',
+      theme: ThemeData.dark(),
+      home: const Scaffold(body: SafeArea(child: _Body())),
+    );
+  }
+}
+
+class _Body extends StatefulWidget {
   const _Body({Key? key}) : super(key: key);
+
+  @override
+  State<_Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<_Body> {
+  late StreamController<Location> _currentExpandedNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentExpandedNotifier = StreamController<Location>.broadcast();
+  }
+
+  @override
+  void dispose() {
+    _currentExpandedNotifier.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final queryData = MediaQuery.of(context);
     final padding = queryData.padding;
-    return SafeArea(
-      child: Stack(
-        children: [
-          SizedBox(
-            width: queryData.size.width,
-            height: queryData.size.height,
-            child: const _Page(Location.none),
-          ),
-          _OverlayWrapper(Location.left, padding),
-          _OverlayWrapper(Location.right, padding),
-          _OverlayWrapper(Location.bottom, padding),
-          _OverlayWrapper(Location.top, padding),
-        ],
-      ),
+    return Stack(
+      children: [
+        SizedBox(
+          width: queryData.size.width,
+          height: queryData.size.height,
+          child: const _Page(Location.none),
+        ),
+        _OverlayWrapper(Location.left, padding, _currentExpandedNotifier),
+        _OverlayWrapper(Location.right, padding, _currentExpandedNotifier),
+        _OverlayWrapper(Location.bottom, padding, _currentExpandedNotifier),
+        _OverlayWrapper(Location.top, padding, _currentExpandedNotifier),
+      ],
     );
   }
 }
@@ -57,18 +79,21 @@ class _Body extends StatelessWidget {
 class _OverlayWrapper extends StatelessWidget {
   const _OverlayWrapper(
     this.location,
-    this.padding, {
+    this.padding,
+    this.currentExpandedNotifier, {
     Key? key,
   }) : super(key: key);
 
   final Location location;
   final EdgeInsets padding;
+  final StreamController<Location> currentExpandedNotifier;
 
   @override
   Widget build(BuildContext context) {
     return SwipeOverlay(
       location,
       padding,
+      currentExpandedNotifier: currentExpandedNotifier,
       child: _Page(location),
     );
   }
