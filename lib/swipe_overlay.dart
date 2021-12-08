@@ -19,8 +19,8 @@ class SwipeOverlay extends StatefulWidget {
 
   final Location location;
   final EdgeInsets padding;
-  final StreamController<Location>? currentExpandedNotifier;
   final Widget child;
+  final StreamController<Location>? currentExpandedNotifier;
 
   double get verticalSafeArea => padding.top + padding.bottom;
 
@@ -38,8 +38,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   bool _isExpanded = false;
   double _offset = 0;
 
-  late StreamSink<Location>? currentExpandedSink;
-  late StreamSubscription? currentExpandedSub;
+  StreamSubscription<Location>? currentExpandedSub;
 
   static const _handleIcon = Icon(
     Icons.drag_handle,
@@ -50,15 +49,13 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   @override
   void initState() {
     super.initState();
-    currentExpandedSink = widget.currentExpandedNotifier?.sink;
-    currentExpandedSub = widget.currentExpandedNotifier?.stream.listen(
-      (event) => setState(() => _currentExpanded = event),
-    );
+    currentExpandedSub = widget.currentExpandedNotifier?.stream
+        .where((event) => event != widget.location)
+        .listen((event) => setState(() => _currentExpanded = event));
   }
 
   @override
   void dispose() {
-    currentExpandedSink?.close();
     currentExpandedSub?.cancel();
     super.dispose();
   }
@@ -67,13 +64,15 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   void didChangeDependencies() {
     _isExpanded = false;
     _calculateOffset(init: true);
-    currentExpandedSink?.add(Location.none);
+    widget.currentExpandedNotifier?.sink.add(Location.none);
     super.didChangeDependencies();
   }
 
   void _setExpanded(bool isExpanded) {
     setState(() => _isExpanded = isExpanded);
-    currentExpandedSink?.add(_isExpanded ? widget.location : Location.none);
+    widget.currentExpandedNotifier?.sink.add(
+      _isExpanded ? widget.location : Location.none,
+    );
     _calculateOffset();
   }
 
@@ -189,7 +188,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
           }
 
           GestureDragStartCallback? onDragStart(_) {
-            currentExpandedSink?.add(widget.location);
+            widget.currentExpandedNotifier?.sink.add(widget.location);
           }
 
           return GestureDetector(
