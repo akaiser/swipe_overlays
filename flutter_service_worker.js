@@ -17,7 +17,7 @@ const RESOURCES = {
 "assets/fonts/MaterialIcons-Regular.otf": "4e6447691c9509f7acdbf8a931a85ca1",
 "index.html": "42cf3340ddf710196292726e1a0175d7",
 "/": "42cf3340ddf710196292726e1a0175d7",
-"version.json": "0b60f575ed1ce1b98f3e93c3817c0820",
+"version.json": "c7717cca5510782cfcd437865554a088",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "main.dart.js": "2fb75e5a62cfbd1160920a8c168f2a01",
 "canvaskit/profiling/canvaskit.js": "f3bfccc993a1e0bfdd3440af60d99df4",
