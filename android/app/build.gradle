@@ -28,7 +28,6 @@ android {
     compileSdkVersion 30
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "de.kaiserv.swipe_overlays"
         minSdkVersion 16
         targetSdkVersion 30
