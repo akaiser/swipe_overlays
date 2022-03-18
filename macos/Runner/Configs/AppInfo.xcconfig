@@ -11,4 +11,4 @@ PRODUCT_NAME = swipe_overlays
 PRODUCT_BUNDLE_IDENTIFIER = de.kaiserv.swipeOverlays
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2021 de.kaiserv. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2022 de.kaiserv. All rights reserved.
