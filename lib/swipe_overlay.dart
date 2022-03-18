@@ -170,7 +170,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
       curve: Curves.easeOut,
       child: Builder(
         builder: (context) {
-          GestureDragUpdateCallback? onDragUpdate(DragUpdateDetails details) {
+          void onDragUpdate(details) {
             final offset = _offset +
                 details.primaryDelta! *
                     (location == Location.left || location == Location.top
@@ -181,13 +181,13 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
             setState(() => _offset = offset);
           }
 
-          GestureDragEndCallback? onDragEnd(_) {
+          void onDragEnd(_) {
             _setExpanded(
               _offset < (isHorizontal ? screenWidth : screenHeight) / 2,
             );
           }
 
-          GestureDragStartCallback? onDragStart(_) {
+          void onDragStart(_) {
             widget.currentExpandedNotifier?.sink.add(widget.location);
           }
 
