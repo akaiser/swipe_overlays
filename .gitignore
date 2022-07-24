@@ -32,6 +32,7 @@ _publish.sh
 .pub-cache/
 .pub/
 /build/
+/local.properties
 
 # Web related
 lib/generated_plugin_registrant.dart

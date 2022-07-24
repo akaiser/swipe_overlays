@@ -15,20 +15,25 @@ Future<void> precache(ImageProvider provider) {
 
   late final ImageStreamListener listener;
 
-  listener = ImageStreamListener((image, _) {
-    completer.complete();
-    stream.removeListener(listener);
-  }, onError: (exception, stackTrace) {
-    completer.complete();
-    stream.removeListener(listener);
-    FlutterError.reportError(FlutterErrorDetails(
-      context: ErrorDescription('image failed to load'),
-      library: 'image resource service',
-      exception: exception,
-      stack: stackTrace,
-      silent: true,
-    ));
-  });
+  listener = ImageStreamListener(
+    (image, _) {
+      completer.complete();
+      stream.removeListener(listener);
+    },
+    onError: (exception, stackTrace) {
+      completer.complete();
+      stream.removeListener(listener);
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          context: ErrorDescription('image failed to load'),
+          library: 'image resource service',
+          exception: exception,
+          stack: stackTrace,
+          silent: true,
+        ),
+      );
+    },
+  );
 
   stream.addListener(listener);
   return completer.future;

@@ -1,1 +1,6 @@
-include: package:akaiser_flutter_lints/flutter.yaml
+include: package:very_good_analysis/analysis_options.yaml
+
+linter:
+  rules:
+    library_private_types_in_public_api: false
+    public_member_api_docs: false
