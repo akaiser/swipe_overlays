@@ -14,8 +14,8 @@ class SwipeOverlay extends StatefulWidget {
     this.padding, {
     required this.child,
     this.currentExpandedNotifier,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Location location;
   final EdgeInsets padding;
@@ -170,7 +170,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
       curve: Curves.easeOut,
       child: Builder(
         builder: (context) {
-          void onDragUpdate(details) {
+          void onDragUpdate(DragUpdateDetails details) {
             final offset = _offset +
                 details.primaryDelta! *
                     (location == Location.left || location == Location.top

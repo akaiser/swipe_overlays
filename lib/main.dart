@@ -22,7 +22,7 @@ Future<void> main() async {
 }
 
 class _App extends StatelessWidget {
-  const _App({Key? key}) : super(key: key);
+  const _App();
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class _App extends StatelessWidget {
 }
 
 class _Body extends StatefulWidget {
-  const _Body({Key? key}) : super(key: key);
+  const _Body();
 
   @override
   State<_Body> createState() => _BodyState();
@@ -80,9 +80,8 @@ class _OverlayWrapper extends StatelessWidget {
   const _OverlayWrapper(
     this.location,
     this.padding,
-    this.currentExpandedNotifier, {
-    Key? key,
-  }) : super(key: key);
+    this.currentExpandedNotifier,
+  );
 
   final Location location;
   final EdgeInsets padding;
@@ -100,7 +99,7 @@ class _OverlayWrapper extends StatelessWidget {
 }
 
 class _Page extends StatelessWidget {
-  const _Page(this.location, {Key? key}) : super(key: key);
+  const _Page(this.location);
 
   final Location location;
 
@@ -122,7 +121,7 @@ class _Page extends StatelessWidget {
 }
 
 class _Content extends StatelessWidget {
-  const _Content({Key? key}) : super(key: key);
+  const _Content();
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +148,7 @@ class _Content extends StatelessWidget {
 }
 
 class _Text extends StatelessWidget {
-  const _Text(this.text, {Key? key}) : super(key: key);
+  const _Text(this.text);
 
   final String text;
 
