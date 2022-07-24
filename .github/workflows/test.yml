@@ -14,4 +14,3 @@ jobs:
           channel: 'stable'
       - run: flutter analyze
       - run: flutter test
-ø
