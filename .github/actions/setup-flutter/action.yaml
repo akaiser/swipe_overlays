@@ -1,0 +1,11 @@
+name: Setup Flutter
+description: "What the name says..."
+
+runs:
+  using: composite
+  steps:
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: "3.24.4"
+        channel: "stable"
+        cache: true

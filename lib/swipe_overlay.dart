@@ -10,27 +10,21 @@ enum Location { left, bottom, right, top, none }
 
 class SwipeOverlay extends StatefulWidget {
   const SwipeOverlay(
-    this.location,
-    this.padding, {
+    this.location, {
     required this.child,
     this.currentExpandedNotifier,
     super.key,
   });
 
   final Location location;
-  final EdgeInsets padding;
   final Widget child;
   final StreamController<Location>? currentExpandedNotifier;
-
-  double get verticalSafeArea => padding.top + padding.bottom;
-
-  double get horizontalSafeArea => padding.left + padding.right;
 
   bool get isHorizontal =>
       location == Location.left || location == Location.right;
 
   @override
-  _SwipeOverlayState createState() => _SwipeOverlayState();
+  State<SwipeOverlay> createState() => _SwipeOverlayState();
 }
 
 class _SwipeOverlayState extends State<SwipeOverlay> {
@@ -38,7 +32,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   bool _isExpanded = false;
   double _offset = 0;
 
-  StreamSubscription<Location>? currentExpandedSub;
+  StreamSubscription<void>? currentExpandedSub;
 
   static const _handleIcon = Icon(
     Icons.drag_handle,
@@ -77,7 +71,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   }
 
   void _calculateOffset({bool init = false}) {
-    final screenSize = MediaQuery.of(context).size;
+    final screenSize = MediaQuery.sizeOf(context);
     _offset = !_isExpanded || init
         ? widget.isHorizontal
             ? screenSize.width
@@ -91,13 +85,13 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     final correction = _isExpanded
         ? 0
         : location == Location.top
-            ? widget.verticalSafeArea
+            ? 0
             : location == Location.bottom
-                ? -widget.verticalSafeArea
+                ? -24 // TODO(albert): fixme
                 : location == Location.left
-                    ? widget.horizontalSafeArea
+                    ? 0
                     : location == Location.right
-                        ? -widget.horizontalSafeArea
+                        ? 0
                         : 0;
 
     final offset = location == Location.left || location == Location.top
@@ -109,9 +103,10 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final screenWidth = screenSize.width - widget.horizontalSafeArea;
-    final screenHeight = screenSize.height - widget.verticalSafeArea;
+    final screenSize = MediaQuery.sizeOf(context);
+
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
 
     final isHorizontal = widget.isHorizontal;
     final location = widget.location;
@@ -163,7 +158,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
                       : current == Location.left || current == Location.right
                           ? location == Location.bottom
                               ? handleSize
-                              : -handleSize
+                              : -handleSize + 20
                           : 0))
           : null,
       duration: _animationMillis,
