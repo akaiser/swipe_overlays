@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:swipe_overlays/swipe_overlay.dart';
@@ -8,16 +7,9 @@ import 'package:swipe_overlays/util/image.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await precache(const AssetImage('images/none.jpg'));
+  await precache(const AssetImage('images/none.webp'));
 
-  runZonedGuarded<void>(
-    () => runApp(const _App()),
-    (error, stack) => log(
-      'Some explosion here...',
-      error: error,
-      stackTrace: stack,
-    ),
-  );
+  runApp(const _App());
 }
 
 class _App extends StatelessWidget {
@@ -92,7 +84,7 @@ class _Page extends StatelessWidget {
         decoration: BoxDecoration(
           image: DecorationImage(
             fit: BoxFit.cover,
-            image: AssetImage('images/${location.name}.jpg'),
+            image: AssetImage('images/${location.name}.webp'),
           ),
         ),
         child: const Padding(

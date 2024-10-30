@@ -26,7 +26,7 @@
         body {
             margin: 0;
             background-color: black;
-            background-image: url(assets/images/none.jpg);
+            background-image: url(assets/images/none.webp);
             background-position: center center;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -55,22 +55,9 @@
             100% { opacity: 0.2; }
         }
     </style>
-    <script>
-    // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = null;
-    </script>
-    <!-- This script adds the flutter initialization JS code -->
-    <script src="flutter.js" defer></script>
 </head>
 <body>
-<div id="loading"><span>loading...</span></div>
-<script>
-    window.addEventListener('load', function () {
-    _flutter.loader.loadEntrypoint({serviceWorker: {serviceWorkerVersion: serviceWorkerVersion}})
-        .then((engineInitializer) => engineInitializer.initializeEngine())
-        .then((appRunner) => appRunner.runApp())
-        .then(() => document.querySelector('#loading').remove());
-    });
-</script>
+<div id="loading">loading...</div>
+<script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
