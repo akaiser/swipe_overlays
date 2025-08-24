@@ -17,10 +17,10 @@ class _App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'Swipe Overlays',
-        theme: ThemeData.dark(),
-        home: const Scaffold(body: SafeArea(child: _Body())),
-      );
+    title: 'Swipe Overlays',
+    theme: ThemeData.dark(),
+    home: const Scaffold(body: SafeArea(child: _Body())),
+  );
 }
 
 class _Body extends StatefulWidget {
@@ -47,14 +47,14 @@ class _BodyState extends State<_Body> {
 
   @override
   Widget build(BuildContext context) => Stack(
-        children: [
-          const _Page(Location.none),
-          _OverlayWrapper(Location.left, _currentExpandedNotifier),
-          _OverlayWrapper(Location.right, _currentExpandedNotifier),
-          _OverlayWrapper(Location.bottom, _currentExpandedNotifier),
-          _OverlayWrapper(Location.top, _currentExpandedNotifier),
-        ],
-      );
+    children: [
+      const _Page(Location.none),
+      _OverlayWrapper(Location.left, _currentExpandedNotifier),
+      _OverlayWrapper(Location.right, _currentExpandedNotifier),
+      _OverlayWrapper(Location.bottom, _currentExpandedNotifier),
+      _OverlayWrapper(Location.top, _currentExpandedNotifier),
+    ],
+  );
 }
 
 class _OverlayWrapper extends StatelessWidget {
@@ -68,10 +68,10 @@ class _OverlayWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SwipeOverlay(
-        location,
-        currentExpandedNotifier: currentExpandedNotifier,
-        child: _Page(location),
-      );
+    location,
+    currentExpandedNotifier: currentExpandedNotifier,
+    child: _Page(location),
+  );
 }
 
 class _Page extends StatelessWidget {
@@ -81,17 +81,17 @@ class _Page extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: AssetImage('images/${location.name}.webp'),
-          ),
-        ),
-        child: const Padding(
-          padding: EdgeInsets.all(handleSize),
-          child: _Content(),
-        ),
-      );
+    decoration: BoxDecoration(
+      image: DecorationImage(
+        fit: BoxFit.cover,
+        image: AssetImage('images/${location.name}.webp'),
+      ),
+    ),
+    child: const Padding(
+      padding: EdgeInsets.all(handleSize),
+      child: _Content(),
+    ),
+  );
 }
 
 class _Content extends StatelessWidget {
@@ -99,24 +99,24 @@ class _Content extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Column(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _Text('top left'),
-              _Text('top right'),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _Text('bottom left'),
-              _Text('bottom right'),
-            ],
-          ),
+          _Text('top left'),
+          _Text('top right'),
         ],
-      );
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _Text('bottom left'),
+          _Text('bottom right'),
+        ],
+      ),
+    ],
+  );
 }
 
 class _Text extends StatelessWidget {
@@ -126,13 +126,13 @@ class _Text extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ColoredBox(
-        color: Colors.black,
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Text(
-            text,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-      );
+    color: Colors.black,
+    child: Padding(
+      padding: const EdgeInsets.all(6),
+      child: Text(
+        text,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ),
+  );
 }

@@ -74,8 +74,8 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     final screenSize = MediaQuery.sizeOf(context);
     _offset = !_isExpanded || init
         ? widget.isHorizontal
-            ? screenSize.width
-            : screenSize.height
+              ? screenSize.width
+              : screenSize.height
         : handleSize;
   }
 
@@ -138,26 +138,28 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     return AnimatedPositioned(
       left: isHorizontal
           ? offsetByDirection +
-              (current == Location.left && location == Location.right
-                  ? handleSize
-                  : (current == Location.right && location == Location.left
-                      ? -handleSize
-                      : current == Location.bottom || current == Location.top
+                (current == Location.left && location == Location.right
+                    ? handleSize
+                    : (current == Location.right && location == Location.left
+                          ? -handleSize
+                          : current == Location.bottom ||
+                                current == Location.top
                           ? location == Location.right
-                              ? handleSize
-                              : -handleSize
+                                ? handleSize
+                                : -handleSize
                           : 0))
           : null,
       top: !isHorizontal
           ? offsetByDirection +
-              (current == Location.top && location == Location.bottom
-                  ? handleSize
-                  : (current == Location.bottom && location == Location.top
-                      ? -handleSize
-                      : current == Location.left || current == Location.right
+                (current == Location.top && location == Location.bottom
+                    ? handleSize
+                    : (current == Location.bottom && location == Location.top
+                          ? -handleSize
+                          : current == Location.left ||
+                                current == Location.right
                           ? location == Location.bottom
-                              ? handleSize
-                              : -handleSize + 20
+                                ? handleSize
+                                : -handleSize + 20
                           : 0))
           : null,
       duration: _animationMillis,
@@ -165,7 +167,8 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
       child: Builder(
         builder: (context) {
           void onDragUpdate(DragUpdateDetails details) {
-            final offset = _offset +
+            final offset =
+                _offset +
                 details.primaryDelta! *
                     (location == Location.left || location == Location.top
                         ? -1
