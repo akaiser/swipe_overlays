@@ -10,27 +10,21 @@ enum Location { left, bottom, right, top, none }
 
 class SwipeOverlay extends StatefulWidget {
   const SwipeOverlay(
-    this.location,
-    this.padding, {
+    this.location, {
     required this.child,
-    this.currentExpandedNotifier,
+    required this.currentExpandedNotifier,
     super.key,
   });
 
   final Location location;
-  final EdgeInsets padding;
   final Widget child;
-  final StreamController<Location>? currentExpandedNotifier;
-
-  double get verticalSafeArea => padding.top + padding.bottom;
-
-  double get horizontalSafeArea => padding.left + padding.right;
+  final StreamController<Location> currentExpandedNotifier;
 
   bool get isHorizontal =>
       location == Location.left || location == Location.right;
 
   @override
-  _SwipeOverlayState createState() => _SwipeOverlayState();
+  State<SwipeOverlay> createState() => _SwipeOverlayState();
 }
 
 class _SwipeOverlayState extends State<SwipeOverlay> {
@@ -38,7 +32,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   bool _isExpanded = false;
   double _offset = 0;
 
-  StreamSubscription<Location>? currentExpandedSub;
+  StreamSubscription<void>? currentExpandedSub;
 
   static const _handleIcon = Icon(
     Icons.drag_handle,
@@ -49,7 +43,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   @override
   void initState() {
     super.initState();
-    currentExpandedSub = widget.currentExpandedNotifier?.stream
+    currentExpandedSub = widget.currentExpandedNotifier.stream
         .where((event) => event != widget.location)
         .listen((event) => setState(() => _currentExpanded = event));
   }
@@ -64,41 +58,40 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
   void didChangeDependencies() {
     _isExpanded = false;
     _calculateOffset(init: true);
-    widget.currentExpandedNotifier?.sink.add(Location.none);
+    widget.currentExpandedNotifier.sink.add(Location.none);
     super.didChangeDependencies();
   }
 
   void _setExpanded(bool isExpanded) {
     setState(() => _isExpanded = isExpanded);
-    widget.currentExpandedNotifier?.sink.add(
+    widget.currentExpandedNotifier.sink.add(
       _isExpanded ? widget.location : Location.none,
     );
     _calculateOffset();
   }
 
   void _calculateOffset({bool init = false}) {
-    final screenSize = MediaQuery.of(context).size;
+    final screenSize = MediaQuery.sizeOf(context);
     _offset = !_isExpanded || init
         ? widget.isHorizontal
-            ? screenSize.width
-            : screenSize.height
+              ? screenSize.width
+              : screenSize.height
         : handleSize;
   }
 
   double get offsetByDirection {
     final location = widget.location;
 
+    // TODO(albert): fixme
     final correction = _isExpanded
         ? 0
-        : location == Location.top
-            ? widget.verticalSafeArea
-            : location == Location.bottom
-                ? -widget.verticalSafeArea
-                : location == Location.left
-                    ? widget.horizontalSafeArea
-                    : location == Location.right
-                        ? -widget.horizontalSafeArea
-                        : 0;
+        : switch (location) {
+            Location.left => 0,
+            Location.top => 0,
+            Location.right => 0,
+            Location.bottom => 0,
+            Location.none => 20,
+          };
 
     final offset = location == Location.left || location == Location.top
         ? handleSize - _offset
@@ -109,9 +102,10 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final screenWidth = screenSize.width - widget.horizontalSafeArea;
-    final screenHeight = screenSize.height - widget.verticalSafeArea;
+    final screenSize = MediaQuery.sizeOf(context);
+
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
 
     final isHorizontal = widget.isHorizontal;
     final location = widget.location;
@@ -119,7 +113,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     final handleArea = InkWell(
       onTap: () => _setExpanded(!_isExpanded),
       child: ColoredBox(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withValues(alpha: 0.2),
         child: SizedBox(
           width: !isHorizontal ? screenWidth : null,
           height: isHorizontal ? screenHeight : null,
@@ -144,26 +138,28 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
     return AnimatedPositioned(
       left: isHorizontal
           ? offsetByDirection +
-              (current == Location.left && location == Location.right
-                  ? handleSize
-                  : (current == Location.right && location == Location.left
-                      ? -handleSize
-                      : current == Location.bottom || current == Location.top
+                (current == Location.left && location == Location.right
+                    ? handleSize
+                    : (current == Location.right && location == Location.left
+                          ? -handleSize
+                          : current == Location.bottom ||
+                                current == Location.top
                           ? location == Location.right
-                              ? handleSize
-                              : -handleSize
+                                ? handleSize
+                                : -handleSize
                           : 0))
           : null,
       top: !isHorizontal
           ? offsetByDirection +
-              (current == Location.top && location == Location.bottom
-                  ? handleSize
-                  : (current == Location.bottom && location == Location.top
-                      ? -handleSize
-                      : current == Location.left || current == Location.right
+                (current == Location.top && location == Location.bottom
+                    ? handleSize
+                    : (current == Location.bottom && location == Location.top
+                          ? -handleSize
+                          : current == Location.left ||
+                                current == Location.right
                           ? location == Location.bottom
-                              ? handleSize
-                              : -handleSize
+                                ? handleSize
+                                : -handleSize + 20
                           : 0))
           : null,
       duration: _animationMillis,
@@ -171,7 +167,8 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
       child: Builder(
         builder: (context) {
           void onDragUpdate(DragUpdateDetails details) {
-            final offset = _offset +
+            final offset =
+                _offset +
                 details.primaryDelta! *
                     (location == Location.left || location == Location.top
                         ? -1
@@ -188,7 +185,7 @@ class _SwipeOverlayState extends State<SwipeOverlay> {
           }
 
           void onDragStart(_) {
-            widget.currentExpandedNotifier?.sink.add(widget.location);
+            widget.currentExpandedNotifier.sink.add(widget.location);
           }
 
           return GestureDetector(

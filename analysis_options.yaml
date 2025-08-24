@@ -2,5 +2,12 @@ include: package:very_good_analysis/analysis_options.yaml
 
 linter:
   rules:
-    library_private_types_in_public_api: false
+    avoid_multiple_declarations_per_line: false
+    avoid_unused_constructor_parameters: true
+    always_put_required_named_parameters_first: false
+    depend_on_referenced_packages: false
+    implicit_call_tearoffs: false
+    no_leading_underscores_for_local_identifiers: false
+    prefer_expression_function_bodies: true
     public_member_api_docs: false
+    use_key_in_widget_constructors: false
